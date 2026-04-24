@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useStore, currentTrack } from "../store";
 import { logPlay, trackFileUrl } from "../api";
+import { useNowPlayingContextMenu } from "./NowPlayingContextMenu";
 
 function fmt(s: number): string {
   if (!isFinite(s)) return "0:00";
@@ -16,10 +17,21 @@ export function NowPlaying({ onToggleQueue }: { onToggleQueue: () => void }) {
   const next = useStore((s) => s.next);
   const prev = useStore((s) => s.prev);
 
+  const ctxMenu = useNowPlayingContextMenu();
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.8);
+
+  const seekBy = (delta: number) => {
+    const a = audioRef.current;
+    if (!a) return;
+    const max = a.duration || duration || 0;
+    const t = Math.max(0, Math.min(max, a.currentTime + delta));
+    a.currentTime = t;
+    setProgress(t);
+  };
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = volume;
@@ -62,9 +74,19 @@ export function NowPlaying({ onToggleQueue }: { onToggleQueue: () => void }) {
           onClick={prev}
           disabled={!current}
           className="w-8 h-8 rounded-full hover:bg-neutral-800 disabled:opacity-40 text-neutral-200"
-          aria-label="Previous"
+          aria-label="Previous track"
+          title="Previous track"
         >
           ⏮
+        </button>
+        <button
+          onClick={() => seekBy(-15)}
+          disabled={!current}
+          className="w-9 h-8 rounded-full hover:bg-neutral-800 disabled:opacity-40 text-neutral-300 text-xs tabular-nums"
+          aria-label="Rewind 15 seconds"
+          title="Rewind 15s"
+        >
+          ⟲15
         </button>
         <button
           onClick={() => setPlaying(!playing)}
@@ -75,14 +97,28 @@ export function NowPlaying({ onToggleQueue }: { onToggleQueue: () => void }) {
           {playing ? "⏸" : "▶"}
         </button>
         <button
+          onClick={() => seekBy(15)}
+          disabled={!current}
+          className="w-9 h-8 rounded-full hover:bg-neutral-800 disabled:opacity-40 text-neutral-300 text-xs tabular-nums"
+          aria-label="Forward 15 seconds"
+          title="Forward 15s"
+        >
+          15⟳
+        </button>
+        <button
           onClick={next}
           disabled={!current}
           className="w-8 h-8 rounded-full hover:bg-neutral-800 disabled:opacity-40 text-neutral-200"
-          aria-label="Next"
+          aria-label="Next track"
+          title="Next track"
         >
           ⏭
         </button>
-        <div className="min-w-0 flex-1">
+        <div
+          className="min-w-0 flex-1"
+          onContextMenu={(e) => ctxMenu.onContextMenu(e, current)}
+          title={current ? "Right-click for artist / album" : undefined}
+        >
           <div className="truncate text-neutral-100">{current?.title ?? "Nothing playing"}</div>
           <div className="truncate text-xs text-neutral-500">
             {current ? [current.artist, current.album].filter(Boolean).join(" — ") : "Double-click a track"}
@@ -122,6 +158,7 @@ export function NowPlaying({ onToggleQueue }: { onToggleQueue: () => void }) {
           ☰
         </button>
       </div>
+      {ctxMenu.element}
     </footer>
   );
 }
