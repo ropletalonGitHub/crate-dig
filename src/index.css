@@ -2,10 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Light theme — flips the neutral scale so bg-neutral-950 is near-white
+   and text-neutral-100/200 is near-black. Existing components keep working. */
+:root {
+  --neutral-50: 10 10 11;
+  --neutral-100: 23 23 23;
+  --neutral-200: 38 38 38;
+  --neutral-300: 64 64 64;
+  --neutral-400: 82 82 82;
+  --neutral-500: 115 115 115;
+  --neutral-600: 163 163 163;
+  --neutral-700: 212 212 212;
+  --neutral-800: 229 229 229;
+  --neutral-900: 245 245 245;
+  --neutral-950: 255 255 255;
+  color-scheme: light;
+}
+
+/* Dark theme — standard Tailwind neutral palette values */
+.dark {
+  --neutral-50: 250 250 250;
+  --neutral-100: 245 245 245;
+  --neutral-200: 229 229 229;
+  --neutral-300: 212 212 212;
+  --neutral-400: 163 163 163;
+  --neutral-500: 115 115 115;
+  --neutral-600: 82 82 82;
+  --neutral-700: 64 64 64;
+  --neutral-800: 38 38 38;
+  --neutral-900: 23 23 23;
+  --neutral-950: 10 10 11;
+  color-scheme: dark;
+}
+
 html, body, #root {
   height: 100%;
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #0b0b0d;
-  color: #e5e7eb;
+  background: rgb(var(--neutral-950));
+  color: rgb(var(--neutral-200));
 }
